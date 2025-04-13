@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { authenticateUser } from "../lib/authenticate";
+import { useAtom } from "jotai";
+import { favouritesAtom, searchHistoryAtom } from "@/store";
+import { getFavourites, getHistory } from "@/lib/userData";
+import { authenticateUser } from "@/lib/authenticate";
 
 export default function Login() {
   const router = useRouter();
@@ -8,10 +11,22 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  const [favouritesList, setFavouritesList] = useAtom(favouritesAtom);
+  const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom);
+
   async function handleSubmit(e) {
     e.preventDefault();
     try {
       await authenticateUser(userName, password);
+
+      // ✅ Update atoms
+      async function updateAtoms() {
+        setFavouritesList(await getFavourites());
+        setSearchHistory(await getHistory());
+      }
+
+      await updateAtoms(); // call it before redirect
+
       router.push("/favourites");
     } catch (err) {
       setError("Login failed: " + err.message);
