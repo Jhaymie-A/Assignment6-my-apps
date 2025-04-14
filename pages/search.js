@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { useAtom } from 'jotai';
 import { searchHistoryAtom } from '@/store';
-import { addToHistory } from '@/lib/userData'; // ✅ NEW
+import { addToHistory } from '@/lib/userData'; 
 import { Form, Row, Col, Button, Container } from 'react-bootstrap';
 
 function AdvancedSearch() {
@@ -10,7 +10,7 @@ function AdvancedSearch() {
   const { register, handleSubmit, formState: { errors } } = useForm(); 
   const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom);
 
-  // ✅ Now async
+  
   const submitForm = async (data) => {
     let queryString = `${data.searchBy}=true`;
 
@@ -20,7 +20,7 @@ function AdvancedSearch() {
     if (data.isHighlight) queryString += `&isHighlight=${data.isHighlight ? "true" : "false"}`;
     if (data.q) queryString += `&q=${data.q}`;
 
-    // ✅ Store query in DB
+    
     setSearchHistory(await addToHistory(queryString));
 
     router.push(`/artwork?${queryString}`);

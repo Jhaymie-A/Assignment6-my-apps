@@ -4,17 +4,17 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { searchHistoryAtom } from '@/store';
-import { addToHistory } from '@/lib/userData';
-import { readToken, removeToken } from '@/lib/authenticate'; // ✅ NEW
+import { addToHistory } from "@/lib/userData";
+import { readToken, removeToken } from "@/lib/authenticate"; // ✅ new
 
 function MainNav() {
   const router = useRouter();
-  const token = readToken(); // ✅ read login token
-
   const [searchField, setSearchField] = useState("");
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); 
   const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom);
 
+  const token = readToken(); 
+  
   const handleSubmit = async (event) => {
     event.preventDefault();
     const query = searchField.trim();
@@ -22,15 +22,15 @@ function MainNav() {
       const queryString = `title=true&q=${query}`;
       setSearchHistory(await addToHistory(queryString));
       router.push(`/artwork?${queryString}`);
-      setIsExpanded(false);
+      setIsExpanded(false); 
       setSearchField("");
     }
   };
 
   const logout = () => {
     setIsExpanded(false);
-    removeToken();
-    router.push("/login");
+    removeToken(); // ✅ remove token
+    router.push("/login"); // ✅ redirect
   };
 
   return (
@@ -39,16 +39,16 @@ function MainNav() {
         <Container>
           <Navbar.Brand>Jhaymie Aganon</Navbar.Brand>
 
-          <Navbar.Toggle
-            aria-controls="basic-navbar-nav"
-            onClick={() => setIsExpanded(prev => !prev)}
+          <Navbar.Toggle 
+            aria-controls="basic-navbar-nav" 
+            onClick={() => setIsExpanded(prev => !prev)} 
           />
 
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
               <Link href="/" passHref legacyBehavior>
-                <Nav.Link
-                  onClick={() => setIsExpanded(false)}
+                <Nav.Link 
+                  onClick={() => setIsExpanded(false)} 
                   active={router.pathname === "/"}
                 >
                   Home
@@ -57,8 +57,8 @@ function MainNav() {
 
               {token && (
                 <Link href="/search" passHref legacyBehavior>
-                  <Nav.Link
-                    onClick={() => setIsExpanded(false)}
+                  <Nav.Link 
+                    onClick={() => setIsExpanded(false)} 
                     active={router.pathname === "/search"}
                   >
                     Advanced Search
@@ -87,11 +87,13 @@ function MainNav() {
                         Favourites
                       </NavDropdown.Item>
                     </Link>
+
                     <Link href="/history" passHref legacyBehavior>
                       <NavDropdown.Item onClick={() => setIsExpanded(false)}>
                         Search History
                       </NavDropdown.Item>
                     </Link>
+
                     <NavDropdown.Divider />
                     <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
                   </NavDropdown>

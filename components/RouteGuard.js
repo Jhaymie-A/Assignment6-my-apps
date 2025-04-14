@@ -1,30 +1,47 @@
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
-import { isAuthenticated } from '@/lib/authenticate';
-import { useAtom } from 'jotai';
-import { favouritesAtom, searchHistoryAtom } from '@/store';
-import { getFavourites, getHistory } from '@/lib/userData';
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { isAuthenticated } from "@/lib/authenticate";
+import { useAtom } from "jotai";
+import { favouritesAtom, searchHistoryAtom } from "@/store";
+import { getFavourites, getHistory } from "@/lib/userData";
 
-export default function RouteGuard({ children }) {
-  const { pathname, push } = useRouter();
-  const [, setFavourites] = useAtom(favouritesAtom);
-  const [, setSearchHistory] = useAtom(searchHistoryAtom);
+const PUBLIC_PATHS = ["/login", "/register"];
+
+export default function RouteGuard(props) {
+  const router = useRouter();
+  const [authorized, setAuthorized] = useState(false);
+  const [favouritesList, setFavouritesList] = useAtom(favouritesAtom); 
+  const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom);
+
+  async function updateAtoms() {
+    setFavouritesList(await getFavourites());
+    setSearchHistory(await getHistory());
+  }
 
   useEffect(() => {
-    const publicPaths = ["/login", "/register"];
-    const pathIsPublic = publicPaths.includes(pathname);
+    authCheck(router.pathname);
 
-    if (!isAuthenticated() && !pathIsPublic) {
-      push("/login");
+    const hideContent = () => setAuthorized(false);
+    router.events.on("routeChangeStart", hideContent);
+    router.events.on("routeChangeComplete", authCheck);
+
+    return () => {
+      router.events.off("routeChangeStart", hideContent);
+      router.events.off("routeChangeComplete", authCheck);
+    };
+  }, []);
+
+  function authCheck(url) {
+    const path = url.split("?")[0];
+
+    if (!isAuthenticated() && !PUBLIC_PATHS.includes(path)) {
+      setAuthorized(false);
+      router.push("/login");
     } else {
-      // ✅ Move async function inside useEffect to avoid dependency warning
-      const updateAtoms = async () => {
-        setFavourites(await getFavourites());
-        setSearchHistory(await getHistory());
-      };
       updateAtoms();
+      setAuthorized(true);
     }
-  }, [pathname, push, setFavourites, setSearchHistory]);
+  }
 
-  return children;
+  return authorized && props.children;
 }

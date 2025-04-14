@@ -1,40 +1,65 @@
-import { useAtom } from "jotai";
-import { useRouter } from "next/router";
-import { searchHistoryAtom } from "@/store";
-import { removeFromHistory } from "@/lib/userData"; // ✅ NEW
-import { Card, Button, ListGroup, Container } from "react-bootstrap";
+import { useAtom } from 'jotai';
+import { searchHistoryAtom } from '@/store';
+import { useRouter } from 'next/router';
+import { ListGroup, Card, Container, Button } from 'react-bootstrap';
+import styles from '@/styles/History.module.css';
+import { removeFromHistory } from '@/lib/userData'; // ✅ NEW
 
 function History() {
   const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom);
   const router = useRouter();
 
-  // ✅ Prevent showing empty page during loading
-  if (!searchHistory) return null;
+  if (!searchHistory) return null; // ✅ prevent flash on reload
 
-  // ✅ Async removal from DB
-  const removeHistoryClicked = async (index) => {
-    const historyItem = searchHistory[index];
-    setSearchHistory(await removeFromHistory(historyItem));
+  let parsedHistory = [];
+
+  searchHistory.forEach(h => {
+    let params = new URLSearchParams(h);
+    let entries = params.entries();
+    parsedHistory.push(Object.fromEntries(entries));
+  });
+
+  const historyClicked = (e, index) => {
+    router.push(`/artwork?${searchHistory[index]}`);
+  };
+
+  const removeHistoryClicked = async (e, index) => { // ✅ async & use API
+    e.stopPropagation();
+    setSearchHistory(await removeFromHistory(searchHistory[index]));
   };
 
   return (
     <Container className="mt-4">
       <h2>Search History</h2>
       <br />
-      {searchHistory.length === 0 ? (
+
+      {parsedHistory.length === 0 ? (
         <Card>
           <Card.Body>
             <h5>Nothing Here</h5>
-            <p>No searches recorded yet.</p>
+            <p>Try searching for some artwork.</p>
           </Card.Body>
         </Card>
       ) : (
         <ListGroup>
-          {searchHistory.map((item, index) => (
-            <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
-              {item}
-              <Button variant="outline-danger" size="sm" onClick={() => removeHistoryClicked(index)}>
-                Remove
+          {parsedHistory.map((item, index) => (
+            <ListGroup.Item
+              key={index}
+              onClick={(e) => historyClicked(e, index)}
+              className={styles.historyListItem}
+            >
+              {Object.keys(item).map(key => (
+                <span key={key}>
+                  {key}: <strong>{item[key]}</strong>&nbsp;
+                </span>
+              ))}
+              <Button
+                className="float-end"
+                variant="danger"
+                size="sm"
+                onClick={(e) => removeHistoryClicked(e, index)}
+              >
+                &times;
               </Button>
             </ListGroup.Item>
           ))}

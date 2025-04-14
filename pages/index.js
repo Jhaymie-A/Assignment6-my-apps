@@ -1,12 +1,15 @@
 /*********************************************************************************
-* BTI425 – Assignment 5
+* BTI425 – Assignment 6
 *
 * I declare that this assignment is my own work in accordance with Seneca's
 * Academic Integrity Policy:
 *
 * https://www.senecapolytechnic.ca/about/policies/academic-integrity-policy.html
 *
-* Name: Jhaymie Aganon Student ID: 147114235  Date: March 23, 2024
+* Name: Jhaymie Aganon Student ID: 147114235  Date: April 13, 2025
+*
+* Vercel App (my-app) Link: _____________________________________________________
+* Vercel App (user-api) Link: https://assignment6-user-api-ten.vercel.app/
 *
 ********************************************************************************/
 import { Container, Row, Col, Image } from 'react-bootstrap';

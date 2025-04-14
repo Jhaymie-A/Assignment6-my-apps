@@ -1,3 +1,4 @@
+import { Card, Form, Alert, Button } from "react-bootstrap";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { useAtom } from "jotai";
@@ -6,59 +7,81 @@ import { getFavourites, getHistory } from "@/lib/userData";
 import { authenticateUser } from "@/lib/authenticate";
 
 export default function Login() {
-  const router = useRouter();
-  const [userName, setUserName] = useState("");
+  const [warning, setWarning] = useState("");
+  const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const router = useRouter();
 
   const [favouritesList, setFavouritesList] = useAtom(favouritesAtom);
   const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom);
 
+  async function updateAtoms() {
+    setFavouritesList(await getFavourites());
+    setSearchHistory(await getHistory());
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
+
     try {
-      await authenticateUser(userName, password);
-
-      // ✅ Update atoms
-      async function updateAtoms() {
-        setFavouritesList(await getFavourites());
-        setSearchHistory(await getHistory());
-      }
-
-      await updateAtoms(); // call it before redirect
-
+      await authenticateUser(user, password);
+      await updateAtoms();
       router.push("/favourites");
     } catch (err) {
-      setError("Login failed: " + err.message);
+      setWarning(err.message);
     }
   }
 
   return (
-    <main className="container mt-4">
-      <div className="p-4 mb-4 bg-light rounded-3">
-        <h1 className="mb-0">Login</h1>
-        <p className="lead">Enter your login information below:</p>
-      </div>
+    <>
+      <Card bg="light">
+        <Card.Body>
+          <h2>Login</h2>
+          Log in to access your account and save favourites:
+        </Card.Body>
+      </Card>
 
-      <form onSubmit={handleSubmit}>
-        <label className="form-label">User:</label>
-        <input
-          className="form-control"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-        /><br />
+      <br />
 
-        <label className="form-label">Password:</label>
-        <input
-          className="form-control"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        /><br />
+      <Form onSubmit={handleSubmit}>
+        <Form.Group>
+          <Form.Label>Username:</Form.Label>
+          <Form.Control
+            type="text"
+            value={user}
+            id="userName"
+            name="userName"
+            onChange={(e) => setUser(e.target.value)}
+            required
+          />
+        </Form.Group>
 
-        <button className="btn btn-primary">Log In</button>
-        {error && <p className="text-danger mt-3">{error}</p>}
-      </form>
-    </main>
+        <br />
+
+        <Form.Group>
+          <Form.Label>Password:</Form.Label>
+          <Form.Control
+            type="password"
+            value={password}
+            id="password"
+            name="password"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </Form.Group>
+
+        {warning && (
+          <>
+            <br />
+            <Alert variant="danger">{warning}</Alert>
+          </>
+        )}
+
+        <br />
+        <Button variant="primary" className="" type="submit">
+          Login
+        </Button>
+      </Form>
+    </>
   );
 }
