@@ -8,7 +8,7 @@
 *
 * Name: Jhaymie Aganon Student ID: 147114235  Date: April 13, 2025
 *
-* Vercel App (my-app) Link: _____________________________________________________
+* Vercel App (my-app) Link: https://assignment6-my-apps.vercel.app
 * Vercel App (user-api) Link: https://assignment6-user-api-ten.vercel.app/
 *
 ********************************************************************************/
